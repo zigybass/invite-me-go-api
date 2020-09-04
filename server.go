@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
+	"sync"
 )
 
 type Event struct {
@@ -12,6 +14,7 @@ type Event struct {
 }
 
 type eventHandlers struct {
+	sync.Mutex
 	store map[string]Event
 }
 
@@ -34,11 +37,13 @@ func (h *eventHandlers) events(w http.ResponseWriter, r *http.Request) {
 func (h *eventHandlers) get(w http.ResponseWriter, r *http.Request) {
 	events := make([]Event, len(h.store))
 
+	h.Lock()
 	i := 0
 	for _, event := range h.store {
 		events[i] = event
 		i++
 	}
+	h.Unlock()
 
 	jsonBytes, err := json.Marshal(events)
 
@@ -52,6 +57,24 @@ func (h *eventHandlers) get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *eventHandlers) post(w http.ResponseWriter, r *http.Request) {
+	bodyBytes, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+	}
+
+	var event Event
+	err = json.Unmarshal(bodyBytes, &event)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+	}
+
+	h.store[event.ID] = event
+
+	h.Lock()
+	defer h.Unlock()
 }
 
 func newEventHandlers() *eventHandlers {
