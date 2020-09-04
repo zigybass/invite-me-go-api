@@ -36,12 +36,18 @@ func (h *eventHandlers) get(w http.ResponseWriter, r *http.Request) {
 }
 
 func newEventHandlers() *eventHandlers {
+	// Another option is to grab data from DB storage here
 	return &eventHandlers{
 		store: map[string]Event{
 			"id1": Event{
 				Name:    "Ultimate Frisbee",
 				ID:      "id1",
 				OnGoing: true,
+			},
+			"id2": Event{
+				Name:    "Soccer",
+				ID:      "id2",
+				OnGoing: false,
 			},
 		},
 	}
