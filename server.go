@@ -15,6 +15,22 @@ type eventHandlers struct {
 	store map[string]Event
 }
 
+func (h *eventHandlers) events(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		h.get(w, r)
+		return
+	case "POST":
+		h.post(w, r)
+		return
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write([]byte("Method not allowed"))
+		return
+	}
+
+}
+
 func (h *eventHandlers) get(w http.ResponseWriter, r *http.Request) {
 	events := make([]Event, len(h.store))
 
@@ -33,6 +49,9 @@ func (h *eventHandlers) get(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("content-type", "application/json")
 	w.Write(jsonBytes)
+}
+
+func (h *eventHandlers) post(w http.ResponseWriter, r *http.Request) {
 }
 
 func newEventHandlers() *eventHandlers {
@@ -55,7 +74,7 @@ func newEventHandlers() *eventHandlers {
 
 func main() {
 	eventHandlers := newEventHandlers()
-	http.HandleFunc("/events", eventHandlers.get)
+	http.HandleFunc("/events", eventHandlers.events)
 	err := http.ListenAndServe(":8081", nil)
 
 	if err != nil {
