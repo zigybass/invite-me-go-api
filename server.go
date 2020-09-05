@@ -12,7 +12,7 @@ import (
 
 type Event struct {
 	Name    string `json:"name"`
-	ID      string `json:"ID"`
+	Id      string `json:"id"`
 	OnGoing bool   `json:"onGoing"`
 }
 
@@ -82,9 +82,9 @@ func (h *eventHandlers) post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	event.ID = fmt.Sprintf("%d", time.Now().UnixNano())
+	event.Id = fmt.Sprintf("%d", time.Now().UnixNano())
 	h.Lock()
-	h.store[event.ID] = event
+	h.store[event.Id] = event
 	defer h.Unlock()
 }
 
@@ -122,12 +122,12 @@ func newEventHandlers() *eventHandlers {
 		store: map[string]Event{
 			"id1": Event{
 				Name:    "Ultimate Frisbee",
-				ID:      "id1",
+				Id:      "id1",
 				OnGoing: true,
 			},
 			"id2": Event{
 				Name:    "Soccer",
-				ID:      "id2",
+				Id:      "id2",
 				OnGoing: false,
 			},
 		},
@@ -138,8 +138,8 @@ func main() {
 	eventHandlers := newEventHandlers()
 	http.HandleFunc("/events", eventHandlers.events)
 	http.HandleFunc("/events/", eventHandlers.getEvent)
-	err := http.ListenAndServe(":8081", nil)
 
+	err := http.ListenAndServe(":8081", nil)
 	if err != nil {
 		panic(err)
 	}
