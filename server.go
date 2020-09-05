@@ -2,14 +2,16 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"sync"
+	"time"
 )
 
 type Event struct {
 	Name    string `json:"name"`
-	ID      string `json:"id"`
+	ID      string `json:"ID"`
 	OnGoing bool   `json:"onGoing"`
 }
 
@@ -64,16 +66,24 @@ func (h *eventHandlers) post(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 	}
 
+	contentType := r.Header.Get("content-type")
+	if contentType != "application/json" {
+		w.WriteHeader(http.StatusUnsupportedMediaType)
+		w.Write([]byte(fmt.Sprintf("need content-type 'application/json' but got '%s'", contentType)))
+		return
+	}
+
 	var event Event
 	err = json.Unmarshal(bodyBytes, &event)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
+		return
 	}
 
-	h.store[event.ID] = event
-
+	event.ID = fmt.Sprintf("%d", time.Now().UnixNano())
 	h.Lock()
+	h.store[event.ID] = event
 	defer h.Unlock()
 }
 
