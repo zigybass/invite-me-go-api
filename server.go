@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
@@ -87,6 +88,34 @@ func (h *eventHandlers) post(w http.ResponseWriter, r *http.Request) {
 	defer h.Unlock()
 }
 
+func (h *eventHandlers) getEvent(w http.ResponseWriter, r *http.Request) {
+	parts := strings.Split(r.URL.String(), "/")
+
+	if len(parts) != 3 {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	h.Lock()
+	event, ok := h.store[parts[2]]
+	h.Unlock()
+
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	jsonBytes, err := json.Marshal(event)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+	}
+
+	w.Header().Add("content-type", "application/json")
+	w.Write(jsonBytes)
+}
+
 func newEventHandlers() *eventHandlers {
 	// Another option is to grab data from DB storage here
 	return &eventHandlers{
@@ -108,6 +137,7 @@ func newEventHandlers() *eventHandlers {
 func main() {
 	eventHandlers := newEventHandlers()
 	http.HandleFunc("/events", eventHandlers.events)
+	http.HandleFunc("/events/", eventHandlers.getEvent)
 	err := http.ListenAndServe(":8081", nil)
 
 	if err != nil {
