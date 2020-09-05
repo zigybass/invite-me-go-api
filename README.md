@@ -1,2 +1,4 @@
 # invite-me-go-api
-API using Go
+REST API for Invite Me app. Written in Go.
+
+Dockerfile is included for containerization. 
