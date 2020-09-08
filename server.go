@@ -22,6 +22,7 @@ type eventHandlers struct {
 }
 
 func (h *eventHandlers) events(w http.ResponseWriter, r *http.Request) {
+	setupCORS(&w, r)
 	switch r.Method {
 	case "GET":
 		h.get(w, r)
@@ -59,7 +60,6 @@ func (h *eventHandlers) get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add("content-type", "application/json")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Write(jsonBytes)
 }
 
@@ -99,7 +99,6 @@ func (h *eventHandlers) post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Add("content-type", "application/json")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Write(jsonBytes)
 }
 
@@ -141,13 +140,14 @@ func newEventHandlers() *eventHandlers {
 				Id:      "id1",
 				OnGoing: true,
 			},
-			"id2": Event{
-				Name:    "Soccer",
-				Id:      "id2",
-				OnGoing: false,
-			},
 		},
 	}
+}
+
+func setupCORS(w *http.ResponseWriter, req *http.Request) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 }
 
 func main() {
