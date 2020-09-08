@@ -29,6 +29,9 @@ func (h *eventHandlers) events(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		h.post(w, r)
 		return
+	case "OPTIONS":
+		w.WriteHeader(http.StatusOK)
+		return
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte("Method not allowed"))
@@ -56,6 +59,7 @@ func (h *eventHandlers) get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add("content-type", "application/json")
+	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Write(jsonBytes)
 }
 
@@ -65,6 +69,7 @@ func (h *eventHandlers) post(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
+		return
 	}
 
 	contentType := r.Header.Get("content-type")
@@ -85,7 +90,17 @@ func (h *eventHandlers) post(w http.ResponseWriter, r *http.Request) {
 	event.Id = fmt.Sprintf("%d", time.Now().UnixNano())
 	h.Lock()
 	h.store[event.Id] = event
-	defer h.Unlock()
+	h.Unlock()
+
+	jsonBytes, err := json.Marshal(event)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.Header().Add("content-type", "application/json")
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+	w.Write(jsonBytes)
 }
 
 func (h *eventHandlers) getEvent(w http.ResponseWriter, r *http.Request) {
@@ -113,6 +128,7 @@ func (h *eventHandlers) getEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add("content-type", "application/json")
+	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Write(jsonBytes)
 }
 
