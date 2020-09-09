@@ -8,6 +8,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/zigybass/invite-me-go-api/cors"
 )
 
 type Event struct {
@@ -22,6 +24,7 @@ type eventHandlers struct {
 }
 
 func (h *eventHandlers) events(w http.ResponseWriter, r *http.Request) {
+	cors.SetupCORS(&w, r)
 	switch r.Method {
 	case "GET":
 		h.get(w, r)
@@ -59,7 +62,6 @@ func (h *eventHandlers) get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add("content-type", "application/json")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Write(jsonBytes)
 }
 
@@ -99,7 +101,6 @@ func (h *eventHandlers) post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Add("content-type", "application/json")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Write(jsonBytes)
 }
 
@@ -128,7 +129,6 @@ func (h *eventHandlers) getEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add("content-type", "application/json")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Write(jsonBytes)
 }
 
@@ -140,11 +140,6 @@ func newEventHandlers() *eventHandlers {
 				Name:    "Ultimate Frisbee",
 				Id:      "id1",
 				OnGoing: true,
-			},
-			"id2": Event{
-				Name:    "Soccer",
-				Id:      "id2",
-				OnGoing: false,
 			},
 		},
 	}
