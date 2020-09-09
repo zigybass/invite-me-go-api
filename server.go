@@ -8,6 +8,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/zigybass/invite-me-go-api/cors"
 )
 
 type Event struct {
@@ -22,7 +24,7 @@ type eventHandlers struct {
 }
 
 func (h *eventHandlers) events(w http.ResponseWriter, r *http.Request) {
-	setupCORS(&w, r)
+	cors.SetupCORS(&w, r)
 	switch r.Method {
 	case "GET":
 		h.get(w, r)
@@ -141,12 +143,6 @@ func newEventHandlers() *eventHandlers {
 			},
 		},
 	}
-}
-
-func setupCORS(w *http.ResponseWriter, req *http.Request) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 }
 
 func main() {
