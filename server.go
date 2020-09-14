@@ -105,6 +105,7 @@ func (h *eventHandlers) post(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *eventHandlers) getEvent(w http.ResponseWriter, r *http.Request) {
+	cors.SetupCORS(&w, r)
 	parts := strings.Split(r.URL.String(), "/")
 
 	if len(parts) != 3 {
