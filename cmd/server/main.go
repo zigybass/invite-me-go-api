@@ -1,18 +1,24 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/zigybass/invite-me-go-api/pkg/events"
 )
+
+func testThis(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("GET request")
+}
 
 func main() {
 
-	r := mux.NewRouter()
+	router := mux.NewRouter()
 
-	// r.HandleFunc("/events", testing)
-	// r.HandleFunc("/events/", testing)
+	router.HandleFunc("/events", events.GetEvents).Methods("GET")
+	// router.HandleFunc("/events/", testing).Methods("GET")
 
-	log.Fatal(http.ListenAndServe(":8081", r))
+	log.Fatal(http.ListenAndServe(":8081", router))
 }
