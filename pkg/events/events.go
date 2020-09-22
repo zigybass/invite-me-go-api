@@ -1,4 +1,4 @@
-package main
+package events
 
 import (
 	"encoding/json"
@@ -13,46 +13,27 @@ import (
 )
 
 type Event struct {
+	mux     sync.Mutex
 	Name    string `json:"name"`
 	Id      string `json:"id"`
 	OnGoing bool   `json:"onGoing"`
 }
 
 type eventHandlers struct {
-	sync.Mutex
+	mux   sync.Mutex
 	store map[string]Event
 }
 
-func (h *eventHandlers) events(w http.ResponseWriter, r *http.Request) {
-	cors.SetupCORS(&w, r)
-	switch r.Method {
-	case "GET":
-		h.get(w, r)
-		return
-	case "POST":
-		h.post(w, r)
-		return
-	case "OPTIONS":
-		w.WriteHeader(http.StatusOK)
-		return
-	default:
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("Method not allowed"))
-		return
-	}
-
+var events = []Event{
+	{
+		Name:    "Ultimate Frisbee",
+		Id:      "id1",
+		OnGoing: true,
+	},
 }
 
-func (h *eventHandlers) get(w http.ResponseWriter, r *http.Request) {
-	events := make([]Event, len(h.store))
-
-	h.Lock()
-	i := 0
-	for _, event := range h.store {
-		events[i] = event
-		i++
-	}
-	h.Unlock()
+func GetEvents(w http.ResponseWriter, r *http.Request) {
+	cors.SetupCORS(&w, r)
 
 	jsonBytes, err := json.Marshal(events)
 
@@ -65,7 +46,7 @@ func (h *eventHandlers) get(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonBytes)
 }
 
-func (h *eventHandlers) post(w http.ResponseWriter, r *http.Request) {
+func (h *eventHandlers) AddEvent(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -90,9 +71,9 @@ func (h *eventHandlers) post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	event.Id = fmt.Sprintf("%d", time.Now().UnixNano())
-	h.Lock()
+	// h.Lock()
 	h.store[event.Id] = event
-	h.Unlock()
+	// h.Unlock()
 
 	jsonBytes, err := json.Marshal(event)
 	if err != nil {
@@ -104,7 +85,7 @@ func (h *eventHandlers) post(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonBytes)
 }
 
-func (h *eventHandlers) getEvent(w http.ResponseWriter, r *http.Request) {
+func (h *eventHandlers) GetEvent(w http.ResponseWriter, r *http.Request) {
 	cors.SetupCORS(&w, r)
 	parts := strings.Split(r.URL.String(), "/")
 
@@ -113,9 +94,9 @@ func (h *eventHandlers) getEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Lock()
+	// h.Lock()
 	event, ok := h.store[parts[2]]
-	h.Unlock()
+	// h.Unlock()
 
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
@@ -133,7 +114,7 @@ func (h *eventHandlers) getEvent(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonBytes)
 }
 
-func newEventHandlers() *eventHandlers {
+func NewEventHandlers() *eventHandlers {
 	// Another option is to grab data from DB storage here
 	return &eventHandlers{
 		store: map[string]Event{
@@ -145,15 +126,3 @@ func newEventHandlers() *eventHandlers {
 		},
 	}
 }
-
-// func main() {
-
-// 	eventHandlers := newEventHandlers()
-// 	http.HandleFunc("/events", eventHandlers.events)
-// 	http.HandleFunc("/events/", eventHandlers.getEvent)
-
-// 	err := http.ListenAndServe(":8081", nil)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// }
