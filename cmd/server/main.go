@@ -17,8 +17,8 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/events", events.GetEvents).Methods("GET")
-	// router.HandleFunc("/events/", testing).Methods("GET")
+	router.HandleFunc("/events", events.Db.GetEvents).Methods("GET")
+	router.HandleFunc("/events/{id}", events.Db.GetEvent).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8081", router))
 }

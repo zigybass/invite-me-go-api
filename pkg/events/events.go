@@ -13,27 +13,28 @@ import (
 )
 
 type Event struct {
-	mux     sync.Mutex
 	Name    string `json:"name"`
 	Id      string `json:"id"`
 	OnGoing bool   `json:"onGoing"`
 }
 
 type eventHandlers struct {
-	mux   sync.Mutex
+	sync.Mutex
 	store map[string]Event
 }
 
-var events = []Event{
-	{
-		Name:    "Ultimate Frisbee",
-		Id:      "id1",
-		OnGoing: true,
-	},
-}
+var Db = newEventHandlers()
 
-func GetEvents(w http.ResponseWriter, r *http.Request) {
-	cors.SetupCORS(&w, r)
+func (h *eventHandlers) GetEvents(w http.ResponseWriter, r *http.Request) {
+	events := make([]Event, len(h.store))
+
+	h.Lock()
+	i := 0
+	for _, event := range h.store {
+		events[i] = event
+		i++
+	}
+	h.Unlock()
 
 	jsonBytes, err := json.Marshal(events)
 
@@ -71,9 +72,9 @@ func (h *eventHandlers) AddEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	event.Id = fmt.Sprintf("%d", time.Now().UnixNano())
-	// h.Lock()
+	h.Lock()
 	h.store[event.Id] = event
-	// h.Unlock()
+	h.Unlock()
 
 	jsonBytes, err := json.Marshal(event)
 	if err != nil {
@@ -94,9 +95,9 @@ func (h *eventHandlers) GetEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// h.Lock()
+	h.Lock()
 	event, ok := h.store[parts[2]]
-	// h.Unlock()
+	h.Unlock()
 
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
@@ -114,7 +115,7 @@ func (h *eventHandlers) GetEvent(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonBytes)
 }
 
-func NewEventHandlers() *eventHandlers {
+func newEventHandlers() *eventHandlers {
 	// Another option is to grab data from DB storage here
 	return &eventHandlers{
 		store: map[string]Event{
