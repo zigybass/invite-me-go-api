@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/zigybass/invite-me-go-api/cors"
+	"github.com/zigybass/invite-me-go-api/pkg/cors"
 )
 
 type Event struct {
@@ -147,6 +147,7 @@ func newEventHandlers() *eventHandlers {
 }
 
 func main() {
+
 	eventHandlers := newEventHandlers()
 	http.HandleFunc("/events", eventHandlers.events)
 	http.HandleFunc("/events/", eventHandlers.getEvent)
