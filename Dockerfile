@@ -1,9 +1,13 @@
 FROM golang:1.15.0-alpine
 
-WORKDIR /app
+WORKDIR /zigy
 
-COPY . /app
+COPY . /zigy
 
-RUN go build -o server .
+RUN go mod download
 
-CMD ["/app/server"]
+COPY . /zigy
+
+RUN go build /zigy/cmd/server/main.go
+
+CMD ["./main"]

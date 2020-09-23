@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -9,16 +8,16 @@ import (
 	"github.com/zigybass/invite-me-go-api/pkg/events"
 )
 
-func testThis(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("GET request")
-}
-
 func main() {
 
 	router := mux.NewRouter()
 
 	router.HandleFunc("/events", events.Db.GetEvents).Methods("GET")
 	router.HandleFunc("/events/{id}", events.Db.GetEvent).Methods("GET")
+
+	router.HandleFunc("/events", events.Db.AddEvent).Methods("POST", "OPTIONS")
+
+	router.Use(mux.CORSMethodMiddleware(router))
 
 	log.Fatal(http.ListenAndServe(":8081", router))
 }

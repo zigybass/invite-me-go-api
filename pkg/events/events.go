@@ -26,6 +26,7 @@ type eventHandlers struct {
 var Db = newEventHandlers()
 
 func (h *eventHandlers) GetEvents(w http.ResponseWriter, r *http.Request) {
+	cors.SetupCORS(&w, r)
 	events := make([]Event, len(h.store))
 
 	h.Lock()
@@ -48,6 +49,10 @@ func (h *eventHandlers) GetEvents(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *eventHandlers) AddEvent(w http.ResponseWriter, r *http.Request) {
+	cors.SetupCORS(&w, r)
+	if r.Method == http.MethodOptions {
+		return
+	}
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
