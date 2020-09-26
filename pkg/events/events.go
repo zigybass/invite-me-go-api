@@ -33,7 +33,9 @@ func (h *eventHandlers) GetEvents(w http.ResponseWriter, r *http.Request) {
 	h.Lock()
 	i := 0
 	for _, event := range h.store {
-		events[i] = event
+		if event.SoftDeleted != true {
+			events[i] = event
+		}
 		i++
 	}
 	h.Unlock()
@@ -135,6 +137,7 @@ func (h *eventHandlers) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 	h.Lock()
 	event, ok := h.store[i]
 	event.SoftDeleted = true
+	h.store[i] = event
 	h.Unlock()
 
 	if !ok {
