@@ -9,13 +9,14 @@ import (
 )
 
 func main() {
-
 	router := mux.NewRouter()
 
 	router.HandleFunc("/events", events.Db.GetEvents).Methods("GET")
 	router.HandleFunc("/events/{id}", events.Db.GetEvent).Methods("GET")
 
 	router.HandleFunc("/events", events.Db.AddEvent).Methods("POST", "OPTIONS")
+
+	router.HandleFunc("/events/{id}", events.Db.DeleteEvent).Methods("DELETE")
 
 	router.Use(mux.CORSMethodMiddleware(router))
 
