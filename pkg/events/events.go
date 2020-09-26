@@ -13,9 +13,10 @@ import (
 )
 
 type Event struct {
-	Name    string `json:"name"`
-	Id      string `json:"id"`
-	OnGoing bool   `json:"onGoing"`
+	Name        string `json:"name"`
+	Id          string `json:"id"`
+	OnGoing     bool   `json:"onGoing"`
+	SoftDeleted bool   `json:"softDeleted"`
 }
 
 type eventHandlers struct {
@@ -102,6 +103,38 @@ func (h *eventHandlers) GetEvent(w http.ResponseWriter, r *http.Request) {
 
 	h.Lock()
 	event, ok := h.store[parts[2]]
+	h.Unlock()
+
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	jsonBytes, err := json.Marshal(event)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+	}
+
+	w.Header().Add("content-type", "application/json")
+	w.Write(jsonBytes)
+}
+
+func (h *eventHandlers) DeleteEvent(w http.ResponseWriter, r *http.Request) {
+	cors.SetupCORS(&w, r)
+
+	parts := strings.Split(r.URL.String(), "/")
+	i := parts[2]
+
+	if len(parts) != 3 {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	h.Lock()
+	event, ok := h.store[i]
+	event.SoftDeleted = true
 	h.Unlock()
 
 	if !ok {
