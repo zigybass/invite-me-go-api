@@ -28,12 +28,15 @@ var Db = newEventHandlers()
 
 func (h *eventHandlers) GetEvents(w http.ResponseWriter, r *http.Request) {
 	cors.SetupCORS(&w, r)
-	events := make([]Event, len(h.store))
+
+	var events []Event
 
 	h.Lock()
 	i := 0
 	for _, event := range h.store {
-		events[i] = event
+		if event.SoftDeleted != true {
+			events = append(events, event)
+		}
 		i++
 	}
 	h.Unlock()
@@ -54,6 +57,7 @@ func (h *eventHandlers) AddEvent(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodOptions {
 		return
 	}
+
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -135,6 +139,7 @@ func (h *eventHandlers) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 	h.Lock()
 	event, ok := h.store[i]
 	event.SoftDeleted = true
+	h.store[event.Id] = event
 	h.Unlock()
 
 	if !ok {
