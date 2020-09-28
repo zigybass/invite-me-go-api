@@ -1,8 +1,11 @@
 package events
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
-type EventModel struct {
+type eventModel struct {
 	Name        string    `json:"name"`
 	Id          string    `json:"id"`
 	Description string    `json:"description:"`
@@ -31,4 +34,22 @@ type location struct {
 type person struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"LastName"`
+}
+
+type eventHandlers struct {
+	sync.Mutex
+	store map[string]eventModel
+}
+
+func newEventHandlers() *eventHandlers {
+	// Another option is to grab data from DB storage here
+	return &eventHandlers{
+		store: map[string]eventModel{
+			"id1": eventModel{
+				Name:    "Ultimate Frisbee",
+				Id:      "id1",
+				OnGoing: false,
+			},
+		},
+	}
 }
