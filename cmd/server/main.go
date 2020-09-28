@@ -16,7 +16,7 @@ func main() {
 
 	router.HandleFunc("/events", events.Db.AddEvent).Methods("POST", "OPTIONS")
 
-	router.HandleFunc("/events/{id}", events.Db.DeleteEvent).Methods("DELETE")
+	router.HandleFunc("/events/{id}", events.Db.DeleteEvent).Methods("DELETE", "OPTIONS")
 
 	router.Use(mux.CORSMethodMiddleware(router))
 
