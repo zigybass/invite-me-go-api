@@ -21,7 +21,7 @@ type Event struct {
 
 type eventHandlers struct {
 	sync.Mutex
-	store map[string]Event
+	store map[string]EventModel
 }
 
 var Db = newEventHandlers()
@@ -29,7 +29,7 @@ var Db = newEventHandlers()
 func (h *eventHandlers) GetEvents(w http.ResponseWriter, r *http.Request) {
 	cors.SetupCORS(&w, r)
 
-	var events []Event
+	var events []EventModel
 
 	h.Lock()
 	i := 0
@@ -73,7 +73,7 @@ func (h *eventHandlers) AddEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var event Event
+	var event EventModel
 	err = json.Unmarshal(bodyBytes, &event)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -161,8 +161,8 @@ func (h *eventHandlers) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 func newEventHandlers() *eventHandlers {
 	// Another option is to grab data from DB storage here
 	return &eventHandlers{
-		store: map[string]Event{
-			"id1": Event{
+		store: map[string]EventModel{
+			"id1": EventModel{
 				Name:    "Ultimate Frisbee",
 				Id:      "id1",
 				OnGoing: true,
