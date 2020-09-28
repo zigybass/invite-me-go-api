@@ -17,11 +17,11 @@ type eventModel struct {
 	Invited     []person  `json:"invited"`
 	Attending   []person  `json:"attending"`
 	Declined    []person  `json:"declined"`
-	OnGoing     bool      `json:"onGoing"`
 	SoftDeleted bool      `json:"softDeleted"`
 }
 
 type location struct {
+	Name       string `json:"name"`
 	AddressOne string `json:"addressOne"`
 	AddressTwo string `json:"addressTwo"`
 	City       string `json:"city"`
@@ -46,9 +46,8 @@ func newEventHandlers() *eventHandlers {
 	return &eventHandlers{
 		store: map[string]eventModel{
 			"id1": eventModel{
-				Name:    "Ultimate Frisbee",
-				Id:      "id1",
-				OnGoing: false,
+				Name: "Ultimate Frisbee",
+				Id:   "id1",
 			},
 		},
 	}
