@@ -2,22 +2,21 @@ package events
 
 import (
 	"sync"
-	"time"
 )
 
 type eventModel struct {
-	Name        string    `json:"name"`
-	Id          string    `json:"id"`
-	Description string    `json:"description:"`
-	CreatedBy   string    `json:"createdBy"`
-	StartTime   time.Time `json:"startTime"`
-	EndTime     time.Time `json:"endTime"`
-	Location    location  `json:"location"`
-	Capacity    int       `json:"capacity"`
-	Invited     []person  `json:"invited"`
-	Attending   []person  `json:"attending"`
-	Declined    []person  `json:"declined"`
-	SoftDeleted bool      `json:"softDeleted"`
+	Name        string   `json:"name"`
+	Id          string   `json:"id"`
+	Description string   `json:"description:"`
+	CreatedBy   string   `json:"createdBy"`
+	StartTime   string   `json:"startTime"`
+	EndTime     string   `json:"endTime"`
+	Location    location `json:"location"`
+	Capacity    int      `json:"capacity"`
+	Invited     []person `json:"invited"`
+	Attending   []person `json:"attending"`
+	Declined    []person `json:"declined"`
+	SoftDeleted bool     `json:"softDeleted"`
 }
 
 type location struct {
